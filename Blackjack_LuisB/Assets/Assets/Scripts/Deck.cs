@@ -86,11 +86,15 @@ public class Deck : MonoBehaviour
             {
                 finalMessage.text = "BlackJack del jugador!";
             }
-            if (dealer.GetComponent<CardHand>().points == 21)
+            else if (dealer.GetComponent<CardHand>().points == 21)
             {
                 finalMessage.text = "BlackJack de la casa!";
             }
-        }
+            else if (player.GetComponent<CardHand>().points == 21 && dealer.GetComponent<CardHand>().points == 21)
+            {
+                finalMessage.text = "¿¿¿¿DOBLE BLACKJACK????";
+            }
+        } 
     }
 
     private void CalculateProbabilities()
@@ -105,9 +109,6 @@ public class Deck : MonoBehaviour
 
     void PushDealer()
     {
-        /*TODO:
-         * Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
-         */
         dealer.GetComponent<CardHand>().Push(faces[cardIndex],values[cardIndex]);
         cardIndex++;        
     }
@@ -173,9 +174,12 @@ public class Deck : MonoBehaviour
             if((21 - playerCards.points) > (21 - dealerCards.points))
             {
                 finalMessage.text = "Gana la casa >:(";
-            } else
+            } else if ((21 - playerCards.points) < (21 - dealerCards.points))
             {
                 finalMessage.text = "Has ganado!! :D";
+            } else
+            {
+                finalMessage.text = "Es un empate";
             }
         }
          
