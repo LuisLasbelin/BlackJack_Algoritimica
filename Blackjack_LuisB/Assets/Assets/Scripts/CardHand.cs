@@ -8,7 +8,8 @@ public class CardHand : MonoBehaviour
     public bool isDealer = false;
     public int points;
     private int coordY;    
-     
+    
+
     private void Awake()
     {
         points = 0;

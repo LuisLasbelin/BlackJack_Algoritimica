@@ -11,11 +11,15 @@ public class Deck : MonoBehaviour
     public Button playAgainButton;
     public Text finalMessage;
     public Text probMessage;
+    public Text bancaText;
+    public Text apuestaText;
     public int iterations;
 
     public int[] values = new int[52];
-    int cardIndex = 0;    
-       
+    int cardIndex = 0;
+    int banca = 1000;
+    int apuesta = 0;
+
     private void Awake()
     {    
         InitCardValues();        
@@ -25,7 +29,10 @@ public class Deck : MonoBehaviour
     private void Start()
     {
         ShuffleCards();
-        StartGame();        
+        StartGame();
+
+        apuestaText.text = apuesta.ToString();
+        bancaText.text = banca.ToString();
     }
 
     private void InitCardValues()
@@ -81,19 +88,27 @@ public class Deck : MonoBehaviour
         {
             PushPlayer();
             PushDealer();
+
+            CardHand dealerCards = dealer.GetComponent<CardHand>();
+            CardHand playerCards = player.GetComponent<CardHand>();
             // Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
-            if(player.GetComponent<CardHand>().points == 21)
+            if (playerCards.points == 21)
             {
                 finalMessage.text = "BlackJack del jugador!";
+                GanaJugador();
             }
-            else if (dealer.GetComponent<CardHand>().points == 21)
+            else if (dealerCards.points == 21)
             {
                 finalMessage.text = "BlackJack de la casa!";
+                PierdeJugador();
             }
-            else if (player.GetComponent<CardHand>().points == 21 && dealer.GetComponent<CardHand>().points == 21)
+            else if (playerCards.points == 21 && dealerCards.points == 21)
             {
                 finalMessage.text = "¿¿¿¿DOBLE BLACKJACK????";
+                Empate();
             }
+
+            
         } 
     }
 
@@ -141,6 +156,7 @@ public class Deck : MonoBehaviour
         if (playerCards.points > 21)
         {
             finalMessage.text = "Has perdido";
+            PierdeJugador();
         }
 
     }
@@ -174,12 +190,17 @@ public class Deck : MonoBehaviour
             if((21 - playerCards.points) > (21 - dealerCards.points))
             {
                 finalMessage.text = "Gana la casa >:(";
+                PierdeJugador();
+
             } else if ((21 - playerCards.points) < (21 - dealerCards.points))
             {
                 finalMessage.text = "Has ganado!! :D";
+                GanaJugador();
+
             } else
             {
                 finalMessage.text = "Es un empate";
+                Empate();
             }
         }
          
@@ -196,5 +217,41 @@ public class Deck : MonoBehaviour
         ShuffleCards();
         StartGame();
     }
-    
+
+    public void SubirApuesta()
+    {
+        if(banca >= 10)
+        {
+            banca -= 10;
+            apuesta += 10;
+        }
+
+        bancaText.text = banca.ToString();
+        apuestaText.text = apuesta.ToString();
+    }
+
+    public void GanaJugador()
+    {
+        banca += apuesta * 2;
+        apuesta = 0;
+
+        bancaText.text = banca.ToString();
+        apuestaText.text = apuesta.ToString();
+    }
+    public void PierdeJugador()
+    {
+        apuesta = 0;
+
+        bancaText.text = banca.ToString();
+        apuestaText.text = apuesta.ToString();
+    }
+
+    public void Empate()
+    {
+        banca += apuesta;
+        apuesta = 0;
+
+        bancaText.text = banca.ToString();
+        apuestaText.text = apuesta.ToString();
+    }
 }
