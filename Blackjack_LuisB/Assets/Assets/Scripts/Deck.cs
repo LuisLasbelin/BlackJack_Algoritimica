@@ -14,6 +14,7 @@ public class Deck : MonoBehaviour
     public Text bancaText;
     public Text apuestaText;
     public int iterations;
+    bool resultado = false;
 
     public int[] values = new int[52];
     int cardIndex = 0;
@@ -139,83 +140,96 @@ public class Deck : MonoBehaviour
 
     public void Hit()
     {
-        /*DONE: 
-         * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
-         */
-        CardHand dealerCards = dealer.GetComponent<CardHand>();
-        if (cardIndex == 4)
+        if (!resultado)
         {
-            dealerCards.cards[0].GetComponent<CardModel>().ToggleFace(true);
+            /*DONE: 
+            * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
+            */
+            CardHand dealerCards = dealer.GetComponent<CardHand>();
+            if (cardIndex == 4)
+            {
+                dealerCards.cards[0].GetComponent<CardModel>().ToggleFace(true);
+            }
+
+            //Repartimos carta al jugador
+            PushPlayer();
+
+            // Comprobamos si el jugador ya ha perdido y mostramos mensaje    
+            CardHand playerCards = player.GetComponent<CardHand>();
+            if (playerCards.points > 21)
+            {
+                finalMessage.text = "Has perdido";
+                PierdeJugador();
+            }
         }
         
-        //Repartimos carta al jugador
-        PushPlayer();
-
-        // Comprobamos si el jugador ya ha perdido y mostramos mensaje    
-        CardHand playerCards = player.GetComponent<CardHand>();
-        if (playerCards.points > 21)
-        {
-            finalMessage.text = "Has perdido";
-            PierdeJugador();
-        }
 
     }
 
     public void Stand()
     {
-        /*DONE: 
-         * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
-         */
-        CardHand dealerCards = dealer.GetComponent<CardHand>();
-        if (cardIndex == 4)
+        if(!resultado)
         {
-            dealerCards.cards[0].GetComponent<CardModel>().ToggleFace(true);
-        }
-
-        /*DONE:
-         * Repartimos cartas al dealer si tiene 16 puntos o menos
-         * El dealer se planta al obtener 17 puntos o más
-         * Mostramos el mensaje del que ha ganado
-         */
-        CardHand playerCards = player.GetComponent<CardHand>();
-
-        if (dealerCards.points <= 16)
-        {
-            PushDealer();
-            Stand();
-        }
-        if(dealerCards.points >= 17)
-        {
-            // Se planta
-            if((21 - playerCards.points) > (21 - dealerCards.points))
+            /*DONE: 
+             * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
+             */
+            CardHand dealerCards = dealer.GetComponent<CardHand>();
+            if (cardIndex == 4)
             {
-                finalMessage.text = "Gana la casa >:(";
-                PierdeJugador();
+                dealerCards.cards[0].GetComponent<CardModel>().ToggleFace(true);
+            }
 
-            } else if ((21 - playerCards.points) < (21 - dealerCards.points))
-            {
-                finalMessage.text = "Has ganado!! :D";
-                GanaJugador();
+            /*DONE:
+             * Repartimos cartas al dealer si tiene 16 puntos o menos
+             * El dealer se planta al obtener 17 puntos o más
+             * Mostramos el mensaje del que ha ganado
+             */
+            CardHand playerCards = player.GetComponent<CardHand>();
 
-            } else
+            if (dealerCards.points <= 16)
             {
-                finalMessage.text = "Es un empate";
-                Empate();
+                PushDealer();
+                Stand();
+            }
+            if (dealerCards.points >= 17)
+            {
+                // Se planta
+                if ((21 - playerCards.points) > (21 - dealerCards.points))
+                {
+                    finalMessage.text = "Gana la casa >:(";
+                    PierdeJugador();
+
+                }
+                else if ((21 - playerCards.points) < (21 - dealerCards.points))
+                {
+                    finalMessage.text = "Has ganado!! :D";
+                    GanaJugador();
+
+                }
+                else
+                {
+                    finalMessage.text = "Es un empate";
+                    Empate();
+                }
             }
         }
-         
     }
 
     public void PlayAgain()
     {
-        hitButton.interactable = true;
-        stickButton.interactable = true;
-        finalMessage.text = "";
-        player.GetComponent<CardHand>().Clear();
-        dealer.GetComponent<CardHand>().Clear();          
-        cardIndex = 0;
-        ShuffleCards();
-        StartGame();
+        if(resultado)
+        {
+            hitButton.interactable = true;
+            stickButton.interactable = true;
+            finalMessage.text = "";
+            player.GetComponent<CardHand>().Clear();
+            dealer.GetComponent<CardHand>().Clear();
+            cardIndex = 0;
+            ShuffleCards();
+            StartGame();
+
+            resultado = false;
+        }
     }
 
     public void SubirApuesta()
@@ -232,6 +246,8 @@ public class Deck : MonoBehaviour
 
     public void GanaJugador()
     {
+        resultado = true;
+
         banca += apuesta * 2;
         apuesta = 0;
 
@@ -240,6 +256,8 @@ public class Deck : MonoBehaviour
     }
     public void PierdeJugador()
     {
+        resultado = true;
+
         apuesta = 0;
 
         bancaText.text = banca.ToString();
@@ -248,6 +266,8 @@ public class Deck : MonoBehaviour
 
     public void Empate()
     {
+        resultado = true;
+
         banca += apuesta;
         apuesta = 0;
 
