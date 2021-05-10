@@ -68,6 +68,9 @@ public class CardHand : MonoBehaviour
             if (f.GetComponent<CardModel>().value != 1)
             {
                 val += f.GetComponent<CardModel>().value;
+            } else
+            {
+                aces++;
             }
         }
 

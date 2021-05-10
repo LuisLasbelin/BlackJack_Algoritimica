@@ -84,11 +84,11 @@ public class Deck : MonoBehaviour
             // Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
             if(player.GetComponent<CardHand>().points == 21)
             {
-                finalMessage.text = "Player Wins!";
+                finalMessage.text = "BlackJack del jugador!";
             }
             if (dealer.GetComponent<CardHand>().points == 21)
             {
-                finalMessage.text = "House Wins!";
+                finalMessage.text = "BlackJack de la casa!";
             }
         }
     }
@@ -123,9 +123,14 @@ public class Deck : MonoBehaviour
 
     public void Hit()
     {
-        /*TODO: 
+        /*DONE: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
+        CardHand dealerCards = dealer.GetComponent<CardHand>();
+        if (cardIndex == 4)
+        {
+            dealerCards.cards[0].GetComponent<CardModel>().ToggleFace(true);
+        }
         
         //Repartimos carta al jugador
         PushPlayer();
@@ -141,21 +146,26 @@ public class Deck : MonoBehaviour
 
     public void Stand()
     {
-        /*TODO: 
+        /*DONE: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
+        CardHand dealerCards = dealer.GetComponent<CardHand>();
+        if (cardIndex == 4)
+        {
+            dealerCards.cards[0].GetComponent<CardModel>().ToggleFace(true);
+        }
 
         /*DONE:
          * Repartimos cartas al dealer si tiene 16 puntos o menos
          * El dealer se planta al obtener 17 puntos o más
          * Mostramos el mensaje del que ha ganado
          */
-        CardHand dealerCards = dealer.GetComponent<CardHand>();
         CardHand playerCards = player.GetComponent<CardHand>();
 
         if (dealerCards.points <= 16)
         {
             PushDealer();
+            Stand();
         }
         if(dealerCards.points >= 17)
         {
