@@ -54,6 +54,14 @@ public class Deck : MonoBehaviour
                 cartasPalo = 1;
             }
         }
+        // Todas las figuras tienen un valor de 10
+        for (int i = 0; i < values.Length; i++)
+        {
+            if(values[i] > 10)
+            {
+                values[i] = 10;
+            }
+        }
     }
 
     private void ShuffleCards()
@@ -87,8 +95,8 @@ public class Deck : MonoBehaviour
     {
         for (int i = 0; i < 2; i++)
         {
-            PushPlayer();
             PushDealer();
+            PushPlayer();
 
             CardHand dealerCards = dealer.GetComponent<CardHand>();
             CardHand playerCards = player.GetComponent<CardHand>();
@@ -121,6 +129,32 @@ public class Deck : MonoBehaviour
          * - Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
          * - Probabilidad de que el jugador obtenga más de 21 si pide una carta          
          */
+        probMessage.text = "";
+
+        CardHand dealerCards = dealer.GetComponent<CardHand>();
+        CardHand playerCards = player.GetComponent<CardHand>();
+        int casosFavorables = 0;
+        if (cardIndex >= 4)
+        {
+            for (int i = cardIndex; i < values.Length; i++)
+            {
+                // Si la suma de la carta levantada y la carta del mazo analizada es mayor que los puntos del jugador y menor o igual de 21
+                if(dealerCards.cards[1].GetComponent<CardModel>().value + values[i] > playerCards.points && 
+                    dealerCards.cards[1].GetComponent<CardModel>().value + values[i] <= 21)
+                {
+                    casosFavorables++;
+                }
+            }
+            // Tenemos en cuenta sus puntos actuales dentro de los casos
+            if(dealerCards.points > playerCards.points && dealerCards.points <= 21)
+            {
+                casosFavorables++;
+            }
+            // Probabilidad del dealer de tener más puntos que el jugador sin robar nada
+            float probabilidadCaso1 = casosFavorables / values.Length;
+
+            probMessage.text += "Probabilidad de ganar el dealer: " + probabilidadCaso1.ToString();
+        }
     }
 
     void PushDealer()
@@ -131,7 +165,6 @@ public class Deck : MonoBehaviour
 
     void PushPlayer()
     {
-
         // Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
         player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]);
         cardIndex++;
