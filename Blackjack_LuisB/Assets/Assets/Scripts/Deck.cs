@@ -17,9 +17,17 @@ public class Deck : MonoBehaviour
     bool resultado = false;
 
     public int[] values = new int[52];
-    int cardIndex = 0;
+    public int cardIndex = 0;
     int banca = 1000;
     int apuesta = 0;
+
+    public int casosFavorables1;
+    public int casosFavorables2;
+    public int casosFavorables3;
+
+    public double probabilidadCaso1;
+    public double probabilidadCaso2;
+    public double probabilidadCaso3;
 
     private void Awake()
     {    
@@ -109,6 +117,7 @@ public class Deck : MonoBehaviour
             else if (dealerCards.points == 21)
             {
                 finalMessage.text = "BlackJack de la casa!";
+                dealerCards.cards[0].GetComponent<CardModel>().ToggleFace(true);
                 PierdeJugador();
             }
             else if (playerCards.points == 21 && dealerCards.points == 21)
@@ -133,8 +142,9 @@ public class Deck : MonoBehaviour
 
         CardHand dealerCards = dealer.GetComponent<CardHand>();
         CardHand playerCards = player.GetComponent<CardHand>();
-        int casosFavorables = 0;
-        if (cardIndex >= 4)
+        casosFavorables1 = 0;
+        // Primer objetivo: Teniendo la carta oculta, probabilidad de que el dealer tenga más puntuación que el jugador
+        if (cardIndex == 4)
         {
             for (int i = cardIndex; i < values.Length; i++)
             {
@@ -142,25 +152,77 @@ public class Deck : MonoBehaviour
                 if(dealerCards.cards[1].GetComponent<CardModel>().value + values[i] > playerCards.points && 
                     dealerCards.cards[1].GetComponent<CardModel>().value + values[i] <= 21)
                 {
-                    casosFavorables++;
+                    casosFavorables1++;
+                }
+                // Contamos otra vez con 11 si es un As
+                if (values[i] == 1)
+                {
+                    if (dealerCards.cards[1].GetComponent<CardModel>().value + 11 > playerCards.points &&
+                    dealerCards.cards[1].GetComponent<CardModel>().value + 11 <= 21)
+                    {
+                        casosFavorables1++;
+                    }
                 }
             }
             // Tenemos en cuenta sus puntos actuales dentro de los casos
             if(dealerCards.points > playerCards.points && dealerCards.points <= 21)
             {
-                casosFavorables++;
+                casosFavorables1++;
             }
-            // Probabilidad del dealer de tener más puntos que el jugador sin robar nada
-            float probabilidadCaso1 = casosFavorables / values.Length;
-
-            probMessage.text += "Probabilidad de ganar el dealer: " + probabilidadCaso1.ToString();
         }
+        // Probabilidad del dealer de tener más puntos que el jugador sin robar nada
+        probabilidadCaso1 = (casosFavorables1 / 52f);
+
+        probMessage.text += "El dealer tiene más puntos: " + probabilidadCaso1.ToString();
+
+        // Segundo objetivo: Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
+        casosFavorables2 = 0;
+        for (int i = cardIndex; i < values.Length; i++)
+        {
+            // Si la suma de la carta levantada y la carta del mazo analizada está entre 17 y 21
+            if (playerCards.points + values[i] >= 17 && playerCards.points + values[i] <= 21)
+            {
+                casosFavorables2++;
+            }
+            // Contamos otra vez con 11 si es un As
+            if(values[i] == 1)
+            {
+                if(playerCards.points + 11 >= 17 && playerCards.points + 11 <= 21)
+                {
+                    casosFavorables2++;
+                }
+            }
+        }
+        probabilidadCaso2 = (casosFavorables2 / 52f);
+        probMessage.text += "\nConseguir entre 17 y 21: " + probabilidadCaso2.ToString();
+
+        // Tercer objetivo: Probabilidad de que el jugador obtenga más de 21 si pide una carta
+        casosFavorables3 = 0;
+        for (int i = cardIndex; i < values.Length; i++)
+        {
+            // Si la suma de la carta levantada y la carta del mazo analizada es mayor que 21
+            if (playerCards.points + values[i] > 21)
+            {
+                casosFavorables3++;
+            }
+            // Contamos otra vez con 11 si es un As
+            if (values[i] == 1)
+            {
+                if (playerCards.points + 11 > 21)
+                {
+                    casosFavorables3++;
+                }
+            }
+        }
+        probabilidadCaso3 = (casosFavorables3 / 52f);
+        probMessage.text += "\nCconseguir más de 21: " + probabilidadCaso3.ToString();
     }
 
     void PushDealer()
     {
         dealer.GetComponent<CardHand>().Push(faces[cardIndex],values[cardIndex]);
-        cardIndex++;        
+        cardIndex++;
+        CalculateProbabilities();
     }
 
     void PushPlayer()
@@ -195,8 +257,6 @@ public class Deck : MonoBehaviour
                 PierdeJugador();
             }
         }
-        
-
     }
 
     public void Stand()
